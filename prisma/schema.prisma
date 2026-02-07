@@ -1,0 +1,250 @@
+// This is your Prisma schema file for City NPC - A Gamified Smart City Application
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SustainabilityScore {
+  CRITICAL
+  CONCERNING
+  DEVELOPING
+  STABLE
+  IMPROVING
+  EFFICIENT
+  LOW_IMPACT
+  POSITIVE_IMPACT
+  LEADING
+}
+
+enum TaskDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum VerificationType {
+  MANUAL_REVIEW
+}
+
+enum TaskStatus {
+  PENDING
+  SUBMITTED
+  VERIFIED
+  REJECTED
+}
+
+enum PetitionStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum CityMood {
+  HAPPY
+  ANGRY
+  NEGLECTED
+  NEUTRAL
+}
+
+// ============================================================================
+// MODELS
+// ============================================================================
+
+// Profile - The User
+// Maps to Supabase auth.users table
+model Profile {
+  id                   String               @id @db.Uuid
+  username             String               @unique
+  role                 Role                 @default(USER)
+  xp_points            Int                  @default(0)
+  sustainability_score SustainabilityScore  @default(STABLE)
+  attributes           Json                 // Stores tags like { "type": "introvert", "occupation": "student" }
+  avatar_url           String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+
+  // Relations
+  userTaskProgress     UserTaskProgress[]
+  petitions            Petition[]
+  posts                Post[]
+  transactions         Transaction[]
+  auditLogs            AuditLog[]
+
+  @@map("profiles")
+}
+
+// CityState - The AI Brain (Singleton)
+model CityState {
+  id           String   @id @db.Uuid
+  mood         CityMood
+  health_stats Json     // Metrics like { "water": 40, "waste": 10, "air": 60 }
+  last_updated DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("city_states")
+}
+
+// CityMemory - Event History
+model CityMemory {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_type   String
+  description  String
+  impact_score Int
+  created_at   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("city_memories")
+}
+
+// Task - The Missions
+model Task {
+  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title             String
+  description       String
+  category          String               // e.g., Water, Transport, Waste
+  difficulty        TaskDifficulty
+  points_reward     Int
+  verification_type VerificationType
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  // Relations
+  userTaskProgress  UserTaskProgress[]
+
+  @@map("tasks")
+}
+
+// UserTaskProgress - Completion Tracking
+model UserTaskProgress {
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id      String      @db.Uuid
+  task_id      String      @db.Uuid
+  status       TaskStatus  @default(PENDING)
+  proof_data   String?     // URL or Text proof
+  completed_at DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relations
+  user         Profile     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  task         Task        @relation(fields: [task_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, task_id])
+  @@map("user_task_progress")
+}
+
+// Petition - Civic Voice
+model Petition {
+  id                    String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creator_id            String          @db.Uuid
+  title                 String
+  description_encrypted String          // Encrypted for privacy
+  location_data         String          // Area/GPS coordinates
+  support_count         Int             @default(0)
+  status                PetitionStatus  @default(OPEN)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  // Relations
+  creator               Profile         @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+
+  @@map("petitions")
+}
+
+// Post - Social Feed
+model Post {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  author_id       String   @db.Uuid
+  content         String
+  image_url       String?
+  sentiment_score Float?   // AI-generated sentiment analysis
+  sdg_tag         String?  // SDG 11 subcategory tag
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  author          Profile  @relation(fields: [author_id], references: [id], onDelete: Cascade)
+
+  @@map("posts")
+}
+
+// Voucher - Shop Items
+model Voucher {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title        String
+  cost_points  Int
+  code         String        @unique // Secret redemption code
+  stock        Int
+  expiry_date  DateTime
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Relations
+  transactions Transaction[]
+
+  @@map("vouchers")
+}
+
+// Transaction - Shop Purchase History
+model Transaction {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id      String   @db.Uuid
+  voucher_id   String   @db.Uuid
+  points_spent Int
+  redeemed_at  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user         Profile  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  voucher      Voucher  @relation(fields: [voucher_id], references: [id], onDelete: Restrict)
+
+  @@map("transactions")
+}
+
+// AuditLog - Security & Admin Actions
+model AuditLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  admin_id  String   @db.Uuid
+  action    String
+  target_id String?  @db.Uuid
+  details   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  admin     Profile  @relation(fields: [admin_id], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}
+
+// Report - Export Generation
+model Report {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  report_type  String   // e.g., "monthly_engagement", "sdg_impact"
+  file_url     String
+  generated_at DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("reports")
+}
