@@ -284,7 +284,7 @@ const SDG11_FACTS = [
 ];
 
 const SDG11Ticker = () => (
-  <div className="relative z-40 w-full shrink-0 overflow-hidden bg-gradient-to-r from-[#0F172A] via-[#1E293B]/90 to-[#0F172A] border-t border-white/10">
+  <div className="relative z-40 w-full shrink-0 overflow-hidden bg-gradient-to-r from-[#0F172A] via-[#1E293B]/90 to-[#0F172A] after:absolute after:inset-x-0 after:bottom-0 after:h-10 after:bg-gradient-to-b after:from-transparent after:to-[#0F172A] after:content-['']">
     <motion.div
       className="flex gap-16 py-2.5 whitespace-nowrap"
       animate={{ x: ["0%", "-50%"] }}
@@ -353,20 +353,21 @@ const DraggableFeatureBubble = ({
       onMouseLeave={handleMouseLeave}
       whileDrag={{ scale: 1.05, cursor: "grabbing" }}
       whileHover={{ scale: 1.05, cursor: "grab" }}
-      className={`group relative p-4 rounded-2xl ${roundedCorner} border bg-[#1E293B]/80 border-[#38BDF8]/20 backdrop-blur-md flex items-center gap-3 w-[260px] shadow-2xl hover:border-[#FD9D24]/50 transition-colors duration-300 touch-none select-none`}
+      // Updated sizing for mobile readability: w-[160px]
+      className={`group relative p-2 sm:p-4 rounded-2xl ${roundedCorner} border bg-[#1E293B]/80 border-[#38BDF8]/20 backdrop-blur-md flex items-center gap-3 w-[160px] sm:w-[260px] shadow-2xl hover:border-[#FD9D24]/50 transition-colors duration-300 touch-none select-none`}
     >
       <div 
         className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" 
         style={{ mixBlendMode: 'overlay' }}
       />
-      <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-[#0F172A] border border-white/5 relative z-10">
-        <Icon size={18} style={{ color: feature.color }} />
+      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 bg-[#0F172A] border border-white/5 relative z-10">
+        <Icon size={16} className="sm:w-[18px] sm:h-[18px]" style={{ color: feature.color }} />
       </div>
       <div className="relative z-10">
-        <p className="text-[10px] font-bold uppercase tracking-widest opacity-80" style={{ color: feature.color }}>
+        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest opacity-80" style={{ color: feature.color }}>
           {feature.title}
         </p>
-        <p className="text-xs text-[#F8FAFC] font-medium leading-snug">{feature.text}</p>
+        <p className="text-[10px] sm:text-xs text-[#F8FAFC] font-medium leading-snug">{feature.text}</p>
       </div>
     </motion.div>
   );
@@ -383,11 +384,20 @@ const FEATURES: FeatureData[] = [
   { id: 4, title: "Community", text: "3 neighbors active nearby.", icon: Users, color: "#F8FAFC" },
 ];
 
-const BUBBLE_PLACEMENTS = [
+// Desktop Positions
+const DESKTOP_PLACEMENTS = [
   { bottom: "60%", left: "0%", side: "left" as const },
   { bottom: "20%", left: "-5%", side: "left" as const },
   { bottom: "60%", right: "0%", side: "right" as const },
   { bottom: "20%", right: "-5%", side: "right" as const },
+];
+
+// MOBILE SCATTER POSITIONS (Targeting the empty area above image)
+const MOBILE_SCATTER_POSITIONS = [
+  { top: "28%", left: "4%", side: "left" as const },   // Top Left
+  { top: "36%", right: "4%", side: "right" as const }, // Mid Right
+  { top: "46%", left: "8%", side: "left" as const },   // Lower Left
+  { top: "54%", right: "8%", side: "right" as const }, // Lowest Right
 ];
 
 export function FuturisticHero() {
@@ -400,6 +410,7 @@ export function FuturisticHero() {
 
   return (
     <section
+      id="home"
       className="relative h-[100dvh] w-screen max-w-full bg-[#0F172A] overflow-hidden flex flex-col"
       style={{ cursor: SDG_CURSOR }}
     >
@@ -443,7 +454,7 @@ export function FuturisticHero() {
         {/* ── CHARACTER + FEATURES AREA ─────────────────────────── */}
         <div className="relative w-full flex-1 flex items-end justify-center min-h-0">
           
-          <div className="relative w-[500px] h-[250px] sm:w-[700px] sm:h-[350px] lg:w-[900px] lg:h-[450px] flex items-end justify-center">
+          <div className="relative w-full max-w-[500px] sm:max-w-[700px] lg:max-w-[900px] h-[250px] sm:h-[350px] lg:h-[450px] flex items-end justify-center">
             
             {/* SVG Arc Background */}
             <svg viewBox="0 0 900 450" className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMax meet">
@@ -484,7 +495,7 @@ export function FuturisticHero() {
               className="relative z-10 flex items-end justify-center h-full w-full"
             >
               <Image
-                src="/assets/gg.webp"
+                src="/assets/gg2.webp"
                 alt="AI Character"
                 width={480}
                 height={600}
@@ -494,12 +505,12 @@ export function FuturisticHero() {
               <div className="absolute bottom-0 w-[200px] sm:w-[300px] h-[20px] bg-[#38BDF8] blur-[40px] opacity-40 rounded-full" />
             </motion.div>
 
-            {/* Feature Bubbles (Desktop) */}
+            {/* ── DESKTOP BUBBLES ── */}
             {FEATURES.map((f, i) => {
-              const placement = BUBBLE_PLACEMENTS[i];
+              const placement = DESKTOP_PLACEMENTS[i];
               return (
                 <motion.div
-                  key={f.id}
+                  key={`desktop-${f.id}`}
                   initial={{ opacity: 0, scale: 0.5 }}
                   animate={mounted ? { opacity: 1, scale: 1 } : {}}
                   transition={{ duration: 0.6, delay: 0.5 + i * 0.15 }}
@@ -520,27 +531,37 @@ export function FuturisticHero() {
               );
             })}
           </div>
-
-          {/* Mobile Feature Bar */}
-          <div className="lg:hidden absolute bottom-10 w-full flex justify-center gap-3 px-4 z-30 pointer-events-auto">
-            <div className="flex gap-3 overflow-x-auto pb-2 w-full justify-center scrollbar-hide">
-              {FEATURES.map((f) => (
-                <motion.div
-                  key={f.id}
-                  drag
-                  dragConstraints={constraintsRef}
-                  dragElastic={0}
-                  dragMomentum={false}
-                  whileDrag={{ scale: 1.1, zIndex: 50 }}
-                  className="shrink-0 p-3 rounded-xl bg-[#1E293B]/90 border border-white/10 backdrop-blur-md flex items-center gap-2 cursor-grab active:cursor-grabbing touch-none select-none"
-                >
-                  <f.icon size={14} style={{ color: f.color }} />
-                  <span className="text-xs text-white whitespace-nowrap font-medium">{f.title}</span>
-                </motion.div>
-              ))}
-            </div>
-          </div>
         </div>
+
+        {/* ── MOBILE SCATTERED BUBBLES ── */}
+        {/* Rendered outside the character container to float freely in the main section */}
+        <div className="lg:hidden absolute inset-0 z-20 pointer-events-none">
+          {FEATURES.map((f, i) => {
+            const placement = MOBILE_SCATTER_POSITIONS[i];
+            return (
+              <motion.div
+                key={`mobile-${f.id}`}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={mounted ? { opacity: 1, scale: 1 } : {}}
+                transition={{ duration: 0.6, delay: 0.5 + i * 0.15 }}
+                className="absolute pointer-events-auto"
+                style={{
+                  top: placement.top,
+                  ...(placement.left !== undefined ? { left: placement.left } : {}),
+                  ...(placement.right !== undefined ? { right: placement.right } : {}),
+                }}
+              >
+                <DraggableFeatureBubble
+                  feature={f}
+                  index={i}
+                  side={placement.side}
+                  constraintsRef={constraintsRef}
+                />
+              </motion.div>
+            );
+          })}
+        </div>
+
       </div>
 
       <SDG11Ticker />
