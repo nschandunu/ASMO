@@ -2,11 +2,13 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Eye, EyeOff, Mail, Lock, User, ArrowRight, 
-  Briefcase, MapPin, Calendar, Globe, Check, X 
+import {
+  Eye, EyeOff, Mail, Lock, User, ArrowRight,
+  Briefcase, MapPin, Calendar, Globe, Check, X, Loader2
 } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SDG 11 DECORATIONS (Floating Icons)
@@ -128,9 +130,9 @@ const PandaAvatar = ({ isBlindfolded }: { isBlindfolded: boolean }) => {
    MAIN PAGE COMPONENT
    ═══════════════════════════════════════════════════════════════════════════ */
 export default function SignUpPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-  
+
   // Form State
   const [formData, setFormData] = useState({
     name: "",
@@ -143,6 +145,8 @@ export default function SignUpPage() {
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [signupLoading, setSignupLoading] = useState(false);
 
   const isPandaBlindfolded = !showPassword;
 
@@ -190,11 +194,34 @@ export default function SignUpPage() {
     letter: /[a-zA-Z]/.test(formData.password),
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate all before submitting
-    // (Logic simplified for display purposes)
-    console.log("Form Data:", formData);
+    const supabase = createClient();
+    setSignupLoading(true);
+    setSignupError(null);
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/protected`,
+          data: {
+            name: formData.name,
+            age: formData.age,
+            occupation: formData.occupation,
+            gender: formData.gender,
+            postal_code: formData.postalCode,
+          },
+        },
+      });
+      if (error) throw error;
+      router.push("/auth/sign-up-success");
+    } catch (error: unknown) {
+      setSignupError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setSignupLoading(false);
+    }
   };
 
   return (
@@ -334,7 +361,7 @@ export default function SignUpPage() {
                     placeholder="Password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    onFocus={() => { setFocusedField("password"); setShowPassword(false); }}
+                    onFocus={() => setShowPassword(false)}
                     // Fix: Added [&::-ms-reveal]:hidden to hide browser default eye
                     className={`w-full bg-[#1E293B]/50 border rounded-xl py-3.5 pl-12 pr-12 text-white placeholder:text-slate-500 focus:outline-none focus:bg-[#1E293B] transition-all [&::-ms-reveal]:hidden ${errors.password ? 'border-red-500/50' : 'border-white/10 focus:border-[#FD9D24]/50'}`}
                   />
@@ -362,9 +389,10 @@ export default function SignUpPage() {
                 </div>
 
                 {/* Submit Button */}
-                <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} className="w-full relative overflow-hidden bg-gradient-to-r from-[#FD9D24] to-[#F59E0B] text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 group/btn">
+                {signupError && <p className="text-red-400 text-sm text-center">{signupError}</p>}
+                <motion.button type="submit" disabled={signupLoading} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} className="w-full relative overflow-hidden bg-gradient-to-r from-[#FD9D24] to-[#F59E0B] text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 group/btn disabled:opacity-60">
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    Create Account <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    {signupLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating Account...</> : <>Create Account <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" /></>}
                   </span>
                   <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-500 skew-x-12" />
                 </motion.button>
