@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Eye, EyeOff, Mail, Lock, User, ArrowRight, 
-  Briefcase, MapPin, Calendar, Globe, Check, Apple 
+import {
+  Eye, EyeOff, Mail, Lock, User, ArrowRight,
+  Briefcase, MapPin, Calendar, Globe, Check, Apple, Loader2
 } from "lucide-react";
 import { Leaf, Building2, Bus, Recycle } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    CONSTANTS & UTILS
@@ -82,11 +84,15 @@ const SocialButtons = () => (
    MAIN PAGE COMPONENT
    ═══════════════════════════════════════════════════════════════════════════ */
 export default function AuthPage() {
+  const router = useRouter();
   const [isFlipped, setIsFlipped] = useState(false);
-  
+
   // LOGIN STATE
+  const [loginEmail, setLoginEmail] = useState("");
   const [loginPass, setLoginPass] = useState("");
   const [showLoginPass, setShowLoginPass] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
   const isLoginBlindfolded = !showLoginPass;
 
   // SIGNUP STATE
@@ -95,6 +101,8 @@ export default function AuthPage() {
   });
   const [showSignupPass, setShowSignupPass] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [signupLoading, setSignupLoading] = useState(false);
   const isSignupBlindfolded = !showSignupPass;
 
   // ─── UPDATED: FLIP HANDLER WITH URL SYNC ──────────────────────────
@@ -132,6 +140,56 @@ export default function AuthPage() {
     number: /\d/.test(signupData.password),
     symbol: /[!@#$%^&*(),.?":{}|<>]/.test(signupData.password),
     letter: /[a-zA-Z]/.test(signupData.password),
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const supabase = createClient();
+    setLoginLoading(true);
+    setLoginError(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPass,
+      });
+      if (error) throw error;
+      router.push("/protected");
+    } catch (error: unknown) {
+      setLoginError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const supabase = createClient();
+    setSignupLoading(true);
+    setSignupError(null);
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: signupData.email,
+        password: signupData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/protected`,
+          data: {
+            name: signupData.name,
+            age: signupData.age,
+            occupation: signupData.occupation,
+            gender: signupData.gender,
+            postal_code: signupData.postalCode,
+          },
+        },
+      });
+      if (error) throw error;
+      router.push("/auth/sign-up-success");
+    } catch (error: unknown) {
+      setSignupError(error instanceof Error ? error.message : "An error occurred");
+    } finally {
+      setSignupLoading(false);
+    }
   };
 
   return (
@@ -173,27 +231,31 @@ export default function AuthPage() {
 
             {/* Right: Form */}
             <div className="w-full md:w-3/5 p-8 md:p-12 flex flex-col justify-center">
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-5" onSubmit={handleLogin}>
                 <div className="relative group/input">
                   <Mail className="absolute left-4 top-3.5 w-5 h-5 text-slate-500 group-focus-within/input:text-[#FD9D24] transition-colors" />
-                  <input type="email" placeholder="Email Address" className="w-full bg-[#1E293B]/50 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#FD9D24]/50 focus:bg-[#1E293B] transition-all" />
+                  <input type="email" placeholder="Email Address" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required className="w-full bg-[#1E293B]/50 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#FD9D24]/50 focus:bg-[#1E293B] transition-all" />
                 </div>
                 <div className="relative group/input">
                   <Lock className="absolute left-4 top-3.5 w-5 h-5 text-slate-500 group-focus-within/input:text-[#FD9D24] transition-colors" />
-                  <input 
-                    type={showLoginPass ? "text" : "password"} 
-                    placeholder="Password" 
+                  <input
+                    type={showLoginPass ? "text" : "password"}
+                    placeholder="Password"
                     value={loginPass}
                     onChange={(e) => setLoginPass(e.target.value)}
                     onFocus={() => setShowLoginPass(false)}
+                    required
                     className="w-full bg-[#1E293B]/50 border border-white/10 rounded-xl py-3.5 pl-12 pr-12 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#FD9D24]/50 focus:bg-[#1E293B] transition-all [&::-ms-reveal]:hidden"
                   />
                   <button type="button" onClick={() => setShowLoginPass(!showLoginPass)} className="absolute right-4 top-3.5 text-slate-500 hover:text-white transition-colors focus:outline-none">
                     {showLoginPass ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} className="w-full relative overflow-hidden bg-gradient-to-r from-[#FD9D24] to-[#F59E0B] text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20">
-                  <span className="relative z-10 flex items-center justify-center gap-2">Log In <ArrowRight className="w-4 h-4" /></span>
+                {loginError && <p className="text-red-400 text-sm text-center">{loginError}</p>}
+                <motion.button type="submit" disabled={loginLoading} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} className="w-full relative overflow-hidden bg-gradient-to-r from-[#FD9D24] to-[#F59E0B] text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 disabled:opacity-60">
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    {loginLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Logging in...</> : <>Log In <ArrowRight className="w-4 h-4" /></>}
+                  </span>
                 </motion.button>
               </form>
 
@@ -233,7 +295,7 @@ export default function AuthPage() {
 
             {/* Right: Detailed Form */}
             <div className="w-full md:w-3/5 p-8 md:p-12 relative">
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-5" onSubmit={handleSignup}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="relative group/input">
                     <User className="absolute left-4 top-3.5 w-5 h-5 text-slate-500" />
@@ -296,8 +358,11 @@ export default function AuthPage() {
                   )}
                 </div>
 
-                <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} className="w-full relative overflow-hidden bg-gradient-to-r from-[#FD9D24] to-[#F59E0B] text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20">
-                  <span className="relative z-10 flex items-center justify-center gap-2">Create Account <ArrowRight className="w-4 h-4" /></span>
+                {signupError && <p className="text-red-400 text-sm text-center">{signupError}</p>}
+                <motion.button type="submit" disabled={signupLoading} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} className="w-full relative overflow-hidden bg-gradient-to-r from-[#FD9D24] to-[#F59E0B] text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 disabled:opacity-60">
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    {signupLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating Account...</> : <>Create Account <ArrowRight className="w-4 h-4" /></>}
+                  </span>
                 </motion.button>
               </form>
 

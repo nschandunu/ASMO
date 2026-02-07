@@ -92,7 +92,7 @@ export function Footer() {
   ];
 
   const quickLinks = [
-    { label: "Home", href: "/#Home" },
+    { label: "Home", href: "/#home" },
     { label: "About", href: "/#about" }, 
     { label: "Contact", href: "/contact" },
   ];
