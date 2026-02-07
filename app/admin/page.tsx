@@ -1,221 +1,138 @@
-'use client'
+import { prisma } from '@/lib/prisma'
+import { Package, Users, ClipboardList, TrendingUp } from 'lucide-react'
 
-import { useState } from 'react'
+export default async function AdminDashboard() {
+  const [userCount, voucherCount, taskCount, totalXP] = await Promise.all([
+    prisma.profile.count(),
+    prisma.voucher.count(),
+    prisma.task.count(),
+    prisma.profile.aggregate({
+      _sum: {
+        xp_points: true,
+      },
+    }),
+  ])
 
-export default function AdminPage() {
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
-  const [cityData, setCityData] = useState<any>(null)
-
-  const initializeCity = async () => {
-    setLoading(true)
-    setMessage('')
-
-    try {
-      const response = await fetch('/api/city/init', {
-        method: 'POST',
-      })
-      const data = await response.json()
-
-      if (data.success) {
-        setMessage('✅ City Brain initialized successfully!')
-        setCityData(data.data)
-      } else {
-        setMessage('❌ Error: ' + data.error)
-      }
-    } catch (error) {
-      setMessage('❌ Error: ' + (error as Error).message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchCityState = async () => {
-    setLoading(true)
-    setMessage('')
-
-    try {
-      const response = await fetch('/api/city')
-      const data = await response.json()
-
-      if (data.success) {
-        setMessage('✅ City Brain data fetched!')
-        setCityData(data.data)
-      } else {
-        setMessage('❌ Error: ' + data.error)
-      }
-    } catch (error) {
-      setMessage('❌ Error: ' + (error as Error).message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const seedDatabase = async () => {
-    if (!confirm('This will create 13 sample tasks and 1 voucher. Continue?')) {
-      return
-    }
-
-    setLoading(true)
-    setMessage('')
-
-    try {
-      const response = await fetch('/api/seed', {
-        method: 'POST',
-      })
-      const data = await response.json()
-
-      if (data.success) {
-        setMessage(`✅ Database seeded! Created ${data.data.tasksCreated} tasks and ${data.data.vouchersCreated} voucher.`)
-      } else {
-        setMessage('❌ Error: ' + data.error)
-      }
-    } catch (error) {
-      setMessage('❌ Error: ' + (error as Error).message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const clearDatabase = async () => {
-    if (!confirm('⚠️ This will DELETE all tasks and vouchers. Are you sure?')) {
-      return
-    }
-
-    setLoading(true)
-    setMessage('')
-
-    try {
-      const response = await fetch('/api/seed', {
-        method: 'DELETE',
-      })
-      const data = await response.json()
-
-      if (data.success) {
-        setMessage('✅ Database cleared successfully!')
-      } else {
-        setMessage('❌ Error: ' + data.error)
-      }
-    } catch (error) {
-      setMessage('❌ Error: ' + (error as Error).message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const stats = [
+    {
+      label: 'Total Users',
+      value: userCount,
+      icon: Users,
+      color: 'bg-blue-600',
+    },
+    {
+      label: 'Active Vouchers',
+      value: voucherCount,
+      icon: Package,
+      color: 'bg-green-600',
+    },
+    {
+      label: 'Available Tasks',
+      value: taskCount,
+      icon: ClipboardList,
+      color: 'bg-purple-600',
+    },
+    {
+      label: 'Total XP Earned',
+      value: totalXP._sum.xp_points || 0,
+      icon: TrendingUp,
+      color: 'bg-orange-600',
+    },
+  ]
 
   return (
-    <div className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2">City NPC Admin Panel</h1>
-        <p className="text-gray-600 mb-8">Initialize and manage the City Brain</p>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+        <p className="text-gray-400 mt-1">Overview of your City NPC system</p>
+      </div>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-2xl font-semibold mb-4">City Brain Setup</h2>
-
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <button
-              onClick={initializeCity}
-              disabled={loading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-            >
-              {loading ? 'Loading...' : 'Initialize City Brain'}
-            </button>
-
-            <button
-              onClick={fetchCityState}
-              disabled={loading}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-            >
-              {loading ? 'Loading...' : 'Fetch City State'}
-            </button>
-
-            <button
-              onClick={seedDatabase}
-              disabled={loading}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-            >
-              {loading ? 'Loading...' : '🌱 Seed Sample Data'}
-            </button>
-
-            <button
-              onClick={clearDatabase}
-              disabled={loading}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
-            >
-              {loading ? 'Loading...' : '🗑️ Clear All Data'}
-            </button>
-          </div>
-
-          {message && (
-            <div className={`p-4 rounded-lg ${message.startsWith('✅') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {message}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className="bg-gray-900 border border-gray-800 rounded-xl p-6 hover:border-gray-700 transition-colors"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className={`${stat.color} p-3 rounded-lg`}>
+                <stat.icon className="w-6 h-6 text-white" />
+              </div>
             </div>
-          )}
+            <p className="text-3xl font-bold text-white mb-1">{stat.value.toLocaleString()}</p>
+            <p className="text-sm text-gray-400">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
+          <div className="space-y-3">
+            <a
+              href="/admin/shop"
+              className="block p-4 bg-gray-800 hover:bg-gray-750 rounded-lg transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Package className="w-5 h-5 text-blue-500" />
+                <div>
+                  <p className="text-white font-medium">Add New Voucher</p>
+                  <p className="text-sm text-gray-400">Create shop rewards</p>
+                </div>
+              </div>
+            </a>
+            <a
+              href="/admin/tasks"
+              className="block p-4 bg-gray-800 hover:bg-gray-750 rounded-lg transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <ClipboardList className="w-5 h-5 text-purple-500" />
+                <div>
+                  <p className="text-white font-medium">Create New Task</p>
+                  <p className="text-sm text-gray-400">Add sustainability missions</p>
+                </div>
+              </div>
+            </a>
+            <a
+              href="/admin/users"
+              className="block p-4 bg-gray-800 hover:bg-gray-750 rounded-lg transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5 text-green-500" />
+                <div>
+                  <p className="text-white font-medium">Manage Users</p>
+                  <p className="text-sm text-gray-400">View and moderate users</p>
+                </div>
+              </div>
+            </a>
+          </div>
         </div>
 
-        {cityData && (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-semibold mb-4">City Brain Data</h2>
-
-            {cityData.city && (
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold mb-3">Current State</h3>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Mood</p>
-                    <p className="text-2xl font-bold">{cityData.city.mood}</p>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Last Updated</p>
-                    <p className="text-sm">{new Date(cityData.city.last_updated).toLocaleString()}</p>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <h4 className="font-semibold mb-2">Health Stats</h4>
-                  <div className="grid grid-cols-5 gap-2">
-                    {Object.entries(cityData.city.health_stats as Record<string, number>).map(([key, value]) => (
-                      <div key={key} className="p-3 bg-blue-50 rounded-lg text-center">
-                        <p className="text-xs text-gray-600 capitalize">{key}</p>
-                        <p className="text-xl font-bold text-blue-600">{value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {cityData.recentMemories && cityData.recentMemories.length > 0 && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <h2 className="text-xl font-semibold text-white mb-4">Recent Activity</h2>
+          <div className="space-y-4 text-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5"></div>
               <div>
-                <h3 className="text-xl font-semibold mb-3">Recent Memories</h3>
-                <div className="space-y-2">
-                  {cityData.recentMemories.map((memory: any) => (
-                    <div key={memory.id} className="p-3 bg-gray-50 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-semibold">{memory.event_type}</p>
-                          <p className="text-sm text-gray-600">{memory.description}</p>
-                        </div>
-                        <span className={`px-2 py-1 rounded text-sm ${memory.impact_score >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {memory.impact_score > 0 ? '+' : ''}{memory.impact_score}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-gray-300">System initialized successfully</p>
+                <p className="text-gray-500 text-xs mt-0.5">Database seeded and ready</p>
               </div>
-            )}
-
-            <details className="mt-6">
-              <summary className="cursor-pointer font-semibold text-gray-600 hover:text-gray-900">
-                View Raw JSON
-              </summary>
-              <pre className="mt-4 p-4 bg-gray-900 text-green-400 rounded-lg overflow-auto text-xs">
-                {JSON.stringify(cityData, null, 2)}
-              </pre>
-            </details>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>
+              <div>
+                <p className="text-gray-300">Admin panel deployed</p>
+                <p className="text-gray-500 text-xs mt-0.5">Full CRUD operations available</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5"></div>
+              <div>
+                <p className="text-gray-300">Ready for management</p>
+                <p className="text-gray-500 text-xs mt-0.5">All features operational</p>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
