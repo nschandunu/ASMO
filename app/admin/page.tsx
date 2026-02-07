@@ -51,6 +51,58 @@ export default function AdminPage() {
     }
   }
 
+  const seedDatabase = async () => {
+    if (!confirm('This will create 13 sample tasks and 1 voucher. Continue?')) {
+      return
+    }
+
+    setLoading(true)
+    setMessage('')
+
+    try {
+      const response = await fetch('/api/seed', {
+        method: 'POST',
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        setMessage(`✅ Database seeded! Created ${data.data.tasksCreated} tasks and ${data.data.vouchersCreated} voucher.`)
+      } else {
+        setMessage('❌ Error: ' + data.error)
+      }
+    } catch (error) {
+      setMessage('❌ Error: ' + (error as Error).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const clearDatabase = async () => {
+    if (!confirm('⚠️ This will DELETE all tasks and vouchers. Are you sure?')) {
+      return
+    }
+
+    setLoading(true)
+    setMessage('')
+
+    try {
+      const response = await fetch('/api/seed', {
+        method: 'DELETE',
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        setMessage('✅ Database cleared successfully!')
+      } else {
+        setMessage('❌ Error: ' + data.error)
+      }
+    } catch (error) {
+      setMessage('❌ Error: ' + (error as Error).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-4xl mx-auto">
@@ -60,7 +112,7 @@ export default function AdminPage() {
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-2xl font-semibold mb-4">City Brain Setup</h2>
 
-          <div className="flex gap-4 mb-4">
+          <div className="grid grid-cols-2 gap-4 mb-4">
             <button
               onClick={initializeCity}
               disabled={loading}
@@ -75,6 +127,22 @@ export default function AdminPage() {
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
             >
               {loading ? 'Loading...' : 'Fetch City State'}
+            </button>
+
+            <button
+              onClick={seedDatabase}
+              disabled={loading}
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+            >
+              {loading ? 'Loading...' : '🌱 Seed Sample Data'}
+            </button>
+
+            <button
+              onClick={clearDatabase}
+              disabled={loading}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+            >
+              {loading ? 'Loading...' : '🗑️ Clear All Data'}
             </button>
           </div>
 
