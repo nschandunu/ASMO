@@ -9,20 +9,11 @@ import Link from "next/link";
  * ============================================================================
  * PremiumNavbar.tsx — Apple-style Glass Morphism Navigation
  * ============================================================================
- *
- * FEATURES:
- * - Glass morphism effect with backdrop blur
- * - Shrinks and centers on scroll (Apple-style)
- * - Unique pill-shaped CTA buttons
- * - Dropdown menu for "Interactions"
- * - Smooth animations and hover effects
- * - Fully responsive design with mobile menu
- * ============================================================================
  */
 
 const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
+  { label: "Home", href: "/#home" }, // UPDATED to anchor
+  { label: "About", href: "/#about" }, // UPDATED to anchor
   { 
     label: "Interactions", 
     href: "#",
@@ -33,7 +24,7 @@ const NAV_LINKS = [
       { label: "Connect", href: "/interactions/connect" },
     ]
   },
-  { label: "Shop", href: "/shop" }, // Added Shop tab here
+  { label: "Shop", href: "/shop" }, 
   { label: "Contact", href: "/contact" },
 ];
 
@@ -81,6 +72,33 @@ export function PremiumNavbar() {
       document.body.style.overflow = "unset";
     };
   }, [mobileMenuOpen]);
+
+  // ─── SMOOTH SCROLL HANDLER ──────────────────────────────────────────────
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, href: string) => {
+    // If it's an anchor link (contains #), handle smooth scrolling
+    if (href.includes("#")) {
+      e.preventDefault();
+      const targetId = href.replace(/.*\#/, ""); // Extract ID after #
+      const elem = document.getElementById(targetId);
+      
+      if (elem) {
+        // Scroll to element with offset for the navbar
+        const offset = 80; // approximate navbar height
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = elem.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth"
+        });
+      }
+    }
+    // Always close mobile menu on click
+    setMobileMenuOpen(false);
+  };
+  // ────────────────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -130,6 +148,8 @@ export function PremiumNavbar() {
                 >
                   <Link
                     href={link.href}
+                    // Attach smooth scroll handler here
+                    onClick={(e) => handleScroll(e, link.href)}
                     className="group flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors relative py-2"
                   >
                     {link.label}
@@ -317,7 +337,8 @@ export function PremiumNavbar() {
                                   <Link
                                     key={item.label}
                                     href={item.href}
-                                    onClick={() => setMobileMenuOpen(false)}
+                                    // Handle mobile dropdown clicks
+                                    onClick={(e) => handleScroll(e, item.href)}
                                     className="block py-2 text-base text-slate-600 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
                                   >
                                     {item.label}
@@ -330,7 +351,8 @@ export function PremiumNavbar() {
                       ) : (
                         <Link
                           href={link.href}
-                          onClick={() => setMobileMenuOpen(false)}
+                          // Handle mobile link clicks
+                          onClick={(e) => handleScroll(e, link.href)}
                           className="block py-3 text-lg font-medium text-slate-700 dark:text-slate-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
                         >
                           {link.label}
