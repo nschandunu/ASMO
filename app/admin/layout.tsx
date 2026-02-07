@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { LayoutDashboard, Package, Users, ClipboardList, FileText } from 'lucide-react'
 import Link from 'next/link'
 
-export const dynamic = 'force-dynamic'
+// export const dynamic = 'force-dynamic'
 
 export default async function AdminLayout({
   children,
@@ -18,9 +18,32 @@ export default async function AdminLayout({
     redirect('/login')
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { id: user.id },
-  })
+  let profile
+  try {
+    profile = await prisma.profile.findUnique({
+      where: { id: user.id },
+    })
+  } catch (error) {
+    console.error('Database connection error:', error)
+    return (
+      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center p-8">
+        <div className="max-w-md w-full bg-gray-900 border border-red-800 rounded-xl p-6">
+          <h1 className="text-2xl font-bold text-red-500 mb-4">Database Connection Error</h1>
+          <p className="text-gray-300 mb-4">
+            Cannot connect to the database. Please check:
+          </p>
+          <ul className="list-disc list-inside space-y-2 text-gray-400 mb-6">
+            <li>Your Supabase project is running (not paused)</li>
+            <li>DATABASE_URL in .env.local is correct</li>
+            <li>Network connection is stable</li>
+          </ul>
+          <p className="text-sm text-gray-500">
+            Error: {error instanceof Error ? error.message : 'Unknown error'}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   if (!profile || profile.role !== 'ADMIN') {
     redirect('/')
