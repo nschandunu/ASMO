@@ -29,7 +29,7 @@ export async function initializeCityBrain(): Promise<CityBrain> {
   })
 
   if (existing) {
-    return existing as CityBrain
+    return existing as unknown as CityBrain
   }
 
   // Create new City Brain with default values
@@ -57,7 +57,7 @@ export async function initializeCityBrain(): Promise<CityBrain> {
     },
   })
 
-  return cityBrain as CityBrain
+  return cityBrain as unknown as CityBrain
 }
 
 /**
@@ -68,7 +68,7 @@ export async function getCityBrain(): Promise<CityBrain | null> {
     where: { id: CITY_BRAIN_ID },
   })
 
-  return cityBrain as CityBrain | null
+  return cityBrain as unknown as CityBrain | null
 }
 
 /**
@@ -114,7 +114,7 @@ export async function updateCityHealth(
     where: { id: CITY_BRAIN_ID },
     data: {
       mood: newMood,
-      health_stats: updatedHealth,
+      health_stats: JSON.parse(JSON.stringify(updatedHealth)),
       last_updated: new Date(),
     },
   })
@@ -128,7 +128,7 @@ export async function updateCityHealth(
     },
   })
 
-  return updated as CityBrain
+  return updated as unknown as CityBrain
 }
 
 /**

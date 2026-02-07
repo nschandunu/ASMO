@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { LayoutDashboard, Package, Users, ClipboardList, FileText } from 'lucide-react'
 import Link from 'next/link'
 
-// export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 
 export default async function AdminLayout({
   children,
