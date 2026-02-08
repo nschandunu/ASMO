@@ -4,11 +4,13 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Eye, EyeOff, Mail, Lock, User, ArrowRight,
-  Briefcase, MapPin, Calendar, Globe, Check, Apple, Loader2
+  Briefcase, MapPin, Calendar, Globe, Check, Apple, Loader2,
+  ArrowLeft // Added for the Back Button
 } from "lucide-react";
 import { Leaf, Building2, Bus, Recycle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import Link from "next/link"; // Added for navigation
 
 /* ═══════════════════════════════════════════════════════════════════════════
    CONSTANTS & UTILS
@@ -193,8 +195,17 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-4 md:p-8 bg-[#0F172A] overflow-y-auto perspective-1000">
+    <div className="flex min-h-screen w-full items-center justify-center p-4 md:p-8 bg-[#0F172A] overflow-y-auto perspective-1000 relative">
       
+      {/* ── BACK BUTTON ────────────────────────────────────────────────── */}
+      <Link 
+        href="/" 
+        className="fixed top-8 left-8 z-[100] flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-slate-400 hover:text-white hover:border-white/20 transition-all group"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-sm font-medium">Back to Home</span>
+      </Link>
+
       {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#38BDF8]/10 rounded-full blur-[120px]" />
@@ -344,7 +355,7 @@ export default function AuthPage() {
                     value={signupData.password} onChange={handleSignupChange} onFocus={() => setShowSignupPass(false)}
                     className="w-full bg-[#1E293B]/50 border border-white/10 rounded-xl py-3.5 pl-12 pr-12 text-white focus:outline-none focus:border-[#FD9D24]/50 focus:bg-[#1E293B] [&::-ms-reveal]:hidden"
                   />
-                  <button type="button" onClick={() => setShowSignupPass(!showSignupPass)} className="absolute right-4 top-3.5 text-slate-500 hover:text-white focus:outline-none">
+                  <button type="button" onClick={() => setShowSignupPass(!showSignupPass)} className="absolute right-4 top-3.5 text-slate-500 hover:text-white transition-colors focus:outline-none">
                     {showSignupPass ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                   
