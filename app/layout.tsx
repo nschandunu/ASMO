@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased overflow-hidden box-border`}>
+      <body className={`${geistSans.className} antialiased box-border`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
