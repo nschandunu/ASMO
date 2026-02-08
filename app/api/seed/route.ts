@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-/**
- * POST /api/seed
- * Seed the database with sample tasks and a test voucher
- */
 export async function POST() {
   try {
-    // Check if tasks already exist
     const existingTasks = await prisma.task.count()
 
     if (existingTasks > 0) {
@@ -18,7 +13,6 @@ export async function POST() {
       })
     }
 
-    // Create sample tasks across all SDG 11 categories
     const tasks = await prisma.task.createMany({
       data: [
         // WATER category

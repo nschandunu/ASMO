@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getCityBrain, getCityMemories } from '@/lib/city-brain'
 
-/**
- * GET /api/city
- * Get the current City Brain state and recent memories
- */
 export async function GET() {
   try {
     const cityBrain = await getCityBrain()

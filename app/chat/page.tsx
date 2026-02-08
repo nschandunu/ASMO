@@ -26,12 +26,8 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
-// --- Component Imports ---
 import { LoadingScreen } from "@/components/loading-screen"
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   SDG 11 VISUAL THEME & DECORATIONS
-   ═══════════════════════════════════════════════════════════════════════════ */
 const SDG_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M8 28V14l4-4 4 4v14' fill='none' stroke='%2338BDF8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M16 28V10l4-6 4 6v18' fill='none' stroke='%23FD9D24' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M2 28V18l3-3 3 3v10' fill='none' stroke='%2322C55E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='0' y1='28' x2='32' y2='28' stroke='%2338BDF8' stroke-width='1' opacity='0.5'/%3E%3Crect x='10' y='18' width='2' height='2' fill='%23FD9D24' opacity='0.8'/%3E%3Crect x='18' y='14' width='2' height='2' fill='%2338BDF8' opacity='0.8'/%3E%3Crect x='18' y='18' width='2' height='2' fill='%2338BDF8' opacity='0.8'/%3E%3Crect x='4' y='21' width='1.5' height='1.5' fill='%2322C55E' opacity='0.8'/%3E%3C/svg%3E") 12 28, auto`;
 
 const FloatingSDGIcons = () => {
@@ -79,9 +75,7 @@ export default function ChatDirectoryPage() {
   const [success, setSuccess] = useState<string | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
-  // ─── SCROLL RESCUE EFFECT ──────────────────────────────────────────
   useEffect(() => {
-    // Force document to allow scrolling just in case parent components locked it
     document.body.style.overflow = 'auto';
     document.documentElement.style.overflow = 'auto';
   }, []);
@@ -139,22 +133,15 @@ export default function ChatDirectoryPage() {
 
   return (
     <LoadingScreen>
-      {/* SCROLL FIX: Standard block div with no hidden overflow.
-          'min-h-screen' ensures the background covers the whole page.
-      */}
       <div 
         className="relative min-h-screen w-full bg-[#0F172A]"
         style={{ cursor: SDG_CURSOR }}
       >
         <FloatingSDGIcons />
 
-        {/* SCROLL FIX: Removed centered flexbox from section. 
-            Spacing is managed by pt, pb, and mx-auto container.
-        */}
         <div className="relative z-10 pt-24 pb-32 px-6">
           <div className="max-w-4xl mx-auto">
-            
-            {/* Back Button */}
+
             <div className="mb-12">
               <Link href="/protected">
                 <motion.button
@@ -167,7 +154,6 @@ export default function ChatDirectoryPage() {
               </Link>
             </div>
 
-            {/* Header Area */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-16">
               <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#22C55E]/30 bg-[#22C55E]/10 text-[#22C55E] text-[10px] font-bold tracking-widest uppercase mb-4">
@@ -191,7 +177,6 @@ export default function ChatDirectoryPage() {
               </Link>
             </div>
 
-            {/* Status Messages */}
             <AnimatePresence>
               {(success || error) && (
                 <motion.div 
@@ -213,7 +198,6 @@ export default function ChatDirectoryPage() {
               )}
             </AnimatePresence>
 
-            {/* Neighborhood Grid */}
             <div className="grid gap-6">
               {rooms.length === 0 ? (
                 <motion.div 
@@ -278,7 +262,6 @@ export default function ChatDirectoryPage() {
               )}
             </div>
 
-            {/* Bottom Community Stats */}
             {rooms.length > 0 && (
               <div className="mt-16 p-6 rounded-[1.8rem] bg-white/[0.02] border border-white/5 backdrop-blur-sm flex justify-between items-center">
                 <div className="flex items-center gap-4">
@@ -289,7 +272,6 @@ export default function ChatDirectoryPage() {
               </div>
             )}
 
-            {/* SDG 11 Mission Tag */}
             <div className="mt-12 flex items-center justify-center gap-3 text-slate-600 font-medium text-xs">
               <CheckCircle2 size={14} />
               <span>Building for SDG Target 11.3: Participatory Settlement Planning</span>

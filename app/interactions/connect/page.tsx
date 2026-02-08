@@ -13,13 +13,11 @@ import {
   Terminal
 } from "lucide-react";
 
-// Component Import
+
 import { Footer } from "@/components/footer";
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   CURSOR CONFIG (Synced with Brand Identity)
-   ═══════════════════════════════════════════════════════════════════════════ */
-const SDG_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M8 28V14l4-4 4 4v14' fill='none' stroke='%2338BDF8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M16 28V10l4-6 4 6v18' fill='none' stroke='%23FD9D24' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M2 28V18l3-3 3 3v10' fill='none' stroke='%2322C55E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='0' y1='28' x2='32' y2='28' stroke='%2338BDF8' stroke-width='1' opacity='0.5'/%3E%3Crect x='10' y='18' width='2' height='2' fill='%23FD9D24' opacity='0.8'/%3E%3Crect x='18' y='14' width='2' height='2' fill='%2338BDF8' opacity='0.8'/%3E%3Crect x='18' y='18' width='2' height='2' fill='%2338BDF8' opacity='0.8'/%3E%3Crect x='4' y='21' width='1.5' height='1.5' fill='%2322C55E' opacity='0.8'/%3E%3C/svg%3E") 12 28, auto`;
+
+const SDG_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E")`;
 
 export default function RestrictedConnectPage() {
   return (
@@ -37,7 +35,7 @@ export default function RestrictedConnectPage() {
           <div 
             className="absolute inset-0 opacity-[0.03]" 
             style={{ 
-              backgroundImage: `radial-gradient(#ffffff 1px, transparent 1px)`, 
+              backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', 
               backgroundSize: '32px 32px' 
             }} 
           />

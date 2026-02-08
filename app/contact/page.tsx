@@ -13,18 +13,11 @@ import {
   ExternalLink
 } from "lucide-react";
 
-// Component Imports
 import { PremiumNavbar } from "@/components/premium-navbar";
 import { Footer } from "@/components/footer";
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   CURSOR CONFIG (Synced with Footer)
-   ═══════════════════════════════════════════════════════════════════════════ */
 const SDG_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M8 28V14l4-4 4 4v14' fill='none' stroke='%2338BDF8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M16 28V10l4-6 4 6v18' fill='none' stroke='%23FD9D24' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M2 28V18l3-3 3 3v10' fill='none' stroke='%2322C55E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='0' y1='28' x2='32' y2='28' stroke='%2338BDF8' stroke-width='1' opacity='0.5'/%3E%3Crect x='10' y='18' width='2' height='2' fill='%23FD9D24' opacity='0.8'/%3E%3Crect x='18' y='14' width='2' height='2' fill='%2338BDF8' opacity='0.8'/%3E%3Crect x='18' y='18' width='2' height='2' fill='%2338BDF8' opacity='0.8'/%3E%3Crect x='4' y='21' width='1.5' height='1.5' fill='%2322C55E' opacity='0.8'/%3E%3C/svg%3E") 12 28, auto`;
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   SOCIAL MEDIA DATA
-   ═══════════════════════════════════════════════════════════════════════════ */
 const SOCIALS = [
   {
     name: "GitHub",
@@ -89,18 +82,15 @@ export default function ContactPage() {
     >
       <PremiumNavbar />
 
-      {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
       <section className="relative pt-32 pb-20 px-6 flex flex-col items-center justify-center overflow-hidden min-h-[calc(100vh-100px)]">
-        
-        {/* Ambient Backgrounds */}
+
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-[20%] left-[-10%] w-[40%] h-[40%] bg-[#38BDF8]/10 rounded-full blur-[120px]" />
           <div className="absolute bottom-[20%] right-[-10%] w-[40%] h-[40%] bg-[#FD9D24]/10 rounded-full blur-[120px]" />
         </div>
 
         <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
-          
-          {/* LEFT: Interface & Headers */}
+
           <div className="lg:col-span-7 flex flex-col justify-center space-y-10">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -120,7 +110,6 @@ export default function ContactPage() {
               </p>
             </motion.div>
 
-            {/* Social Grid Nodes */}
             <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
               {SOCIALS.map((social, i) => (
                 <motion.button
@@ -151,14 +140,12 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* RIGHT: Terminal Sync Display */}
           <div className="lg:col-span-5 relative">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="w-full aspect-[4/5] bg-[#0F172A]/80 border border-white/10 rounded-[2.5rem] p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden"
             >
-              {/* Terminal Header */}
               <div className="flex items-center justify-between mb-10 border-b border-white/5 pb-5">
                 <div className="flex gap-2">
                   <div className="w-2 h-2 rounded-full bg-red-500/30" />
@@ -218,7 +205,6 @@ export default function ContactPage() {
                 )}
               </AnimatePresence>
 
-              {/* Terminal Bio-Signature */}
               <div className="absolute bottom-10 left-10 right-10 flex justify-between items-end border-t border-white/5 pt-6">
                 <div className="space-y-1">
                   <div className="text-[8px] font-mono text-slate-600 uppercase tracking-widest">Local_Time</div>
