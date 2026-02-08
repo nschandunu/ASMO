@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getCityBrain, getCityMemories } from '@/lib/city-brain'
 
+export const runtime = "nodejs"
+
 /**
  * GET /api/city
  * Get the current City Brain state and recent memories

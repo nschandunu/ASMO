@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { initializeCityBrain } from '@/lib/city-brain'
 
+export const runtime = "nodejs"
+
 /**
  * POST /api/city/init
  * Initialize the City Brain (singleton)

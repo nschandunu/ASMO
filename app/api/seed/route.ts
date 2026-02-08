@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export const runtime = "nodejs"
+
 /**
  * POST /api/seed
  * Seed the database with sample tasks and a test voucher
