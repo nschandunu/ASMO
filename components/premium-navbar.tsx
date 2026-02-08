@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
+// 1. Import usePathname to detect current route
+import { usePathname } from "next/navigation";
 
 /**
  * ============================================================================
@@ -11,9 +13,12 @@ import Link from "next/link";
  * ============================================================================
  */
 
+// 2. Cursor Configuration from footer.tsx
+const SDG_CURSOR = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M8 28V14l4-4 4 4v14' fill='none' stroke='%2338BDF8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M16 28V10l4-6 4 6v18' fill='none' stroke='%23FD9D24' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M2 28V18l3-3 3 3v10' fill='none' stroke='%2322C55E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cline x1='0' y1='28' x2='32' y2='28' stroke='%2338BDF8' stroke-width='1' opacity='0.5'/%3E%3Crect x='10' y='18' width='2' height='2' fill='%23FD9D24' opacity='0.8'/%3E%3Crect x='18' y='14' width='2' height='2' fill='%2338BDF8' opacity='0.8'/%3E%3Crect x='18' y='18' width='2' height='2' fill='%2338BDF8' opacity='0.8'/%3E%3Crect x='4' y='21' width='1.5' height='1.5' fill='%2322C55E' opacity='0.8'/%3E%3C/svg%3E") 12 28, auto`;
+
 const NAV_LINKS = [
-  { label: "Home", href: "/#home" }, // UPDATED to anchor
-  { label: "About", href: "/#about" }, // UPDATED to anchor
+  { label: "Home", href: "/#home" },
+  { label: "About", href: "/#about" }, 
   { 
     label: "Interactions", 
     href: "#",
@@ -34,8 +39,10 @@ export function PremiumNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null);
   const { scrollY } = useScroll();
+  
+  // 3. Initialize pathname
+  const pathname = usePathname();
 
-  // Navbar width and padding transform on scroll
   const navWidth = useTransform(scrollY, [0, 100], ["100%", "92%"]);
   const navPaddingY = useTransform(scrollY, [0, 100], [16, 10]);
   const navPaddingX = useTransform(scrollY, [0, 100], [24, 20]);
@@ -49,7 +56,6 @@ export function PremiumNavbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -61,7 +67,6 @@ export function PremiumNavbar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -73,17 +78,16 @@ export function PremiumNavbar() {
     };
   }, [mobileMenuOpen]);
 
-  // ─── SMOOTH SCROLL HANDLER ──────────────────────────────────────────────
+  // ─── UPDATED SMOOTH SCROLL HANDLER ──────────────────────────────────────
   const handleScroll = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, href: string) => {
-    // If it's an anchor link (contains #), handle smooth scrolling
-    if (href.includes("#")) {
-      e.preventDefault();
-      const targetId = href.replace(/.*\#/, ""); // Extract ID after #
+    // If it's an anchor link AND we are already on the home page, perform smooth scroll
+    if (href.includes("#") && pathname === "/") {
+      const targetId = href.replace(/.*\#/, ""); 
       const elem = document.getElementById(targetId);
       
       if (elem) {
-        // Scroll to element with offset for the navbar
-        const offset = 80; // approximate navbar height
+        e.preventDefault(); // Only prevent default if we are scrolling on the same page
+        const offset = 80; 
         const bodyRect = document.body.getBoundingClientRect().top;
         const elementRect = elem.getBoundingClientRect().top;
         const elementPosition = elementRect - bodyRect;
@@ -95,10 +99,10 @@ export function PremiumNavbar() {
         });
       }
     }
-    // Always close mobile menu on click
+    // If pathname !== "/", the default <Link> behavior will navigate to the home page anchor.
+    
     setMobileMenuOpen(false);
   };
-  // ────────────────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -106,6 +110,7 @@ export function PremiumNavbar() {
         style={{
           width: navWidth,
           borderRadius: navBorderRadius,
+          cursor: SDG_CURSOR, // Apply the custom cursor
         }}
         className={`fixed top-0 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
           isScrolled ? "mt-4" : "mt-0"
@@ -148,7 +153,6 @@ export function PremiumNavbar() {
                 >
                   <Link
                     href={link.href}
-                    // Attach smooth scroll handler here
                     onClick={(e) => handleScroll(e, link.href)}
                     className="group flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors relative py-2"
                   >
@@ -180,6 +184,7 @@ export function PremiumNavbar() {
                             <Link
                               key={item.label}
                               href={item.href}
+                              onClick={(e) => handleScroll(e, item.href)}
                               className="block px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-700/80 transition-colors"
                             >
                               <motion.div
@@ -201,7 +206,6 @@ export function PremiumNavbar() {
 
             {/* Desktop CTA Buttons */}
             <div className="hidden md:flex items-center gap-2.5">
-              {/* Sign In Button - Outlined Pill */}
               <Link href="/auth/login">
                 <motion.button
                   whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}
@@ -215,7 +219,6 @@ export function PremiumNavbar() {
                 </motion.button>
               </Link>
 
-              {/* Sign Up Button - Premium Gradient Pill with Glow */}
               <Link href="/auth/sign-up">
                 <motion.button
                   whileHover={{ 
@@ -229,8 +232,6 @@ export function PremiumNavbar() {
                   }}
                 >
                   <span className="relative z-10">Sign Up</span>
-                  
-                  {/* Shimmer Effect */}
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
                     style={{ transform: "skewX(-20deg)", left: "-100%" }}
@@ -242,8 +243,6 @@ export function PremiumNavbar() {
                       ease: "easeInOut",
                     }}
                   />
-                  
-                  {/* Glow ring */}
                   <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{
                       boxShadow: "inset 0 0 20px rgba(255,255,255,0.3)",
@@ -253,7 +252,6 @@ export function PremiumNavbar() {
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -274,7 +272,6 @@ export function PremiumNavbar() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -283,16 +280,15 @@ export function PremiumNavbar() {
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
             />
 
-            {/* Mobile Menu Panel */}
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-white dark:bg-slate-900 z-50 md:hidden overflow-y-auto shadow-2xl"
+              style={{ cursor: SDG_CURSOR }} // Apply cursor to mobile menu panel too
             >
               <div className="p-6">
-                {/* Close button */}
                 <div className="flex justify-between items-center mb-8">
                   <span className="text-xl font-black bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
                     ASMO.
@@ -305,7 +301,6 @@ export function PremiumNavbar() {
                   </button>
                 </div>
 
-                {/* Mobile Navigation Links */}
                 <nav className="space-y-4 mb-8">
                   {NAV_LINKS.map((link) => (
                     <div key={link.label}>
@@ -337,7 +332,6 @@ export function PremiumNavbar() {
                                   <Link
                                     key={item.label}
                                     href={item.href}
-                                    // Handle mobile dropdown clicks
                                     onClick={(e) => handleScroll(e, item.href)}
                                     className="block py-2 text-base text-slate-600 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
                                   >
@@ -351,7 +345,6 @@ export function PremiumNavbar() {
                       ) : (
                         <Link
                           href={link.href}
-                          // Handle mobile link clicks
                           onClick={(e) => handleScroll(e, link.href)}
                           className="block py-3 text-lg font-medium text-slate-700 dark:text-slate-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
                         >
@@ -362,7 +355,6 @@ export function PremiumNavbar() {
                   ))}
                 </nav>
 
-                {/* Mobile CTA Buttons */}
                 <div className="space-y-3 pt-6 border-t border-slate-200 dark:border-slate-700">
                   <Link href="/auth/login" className="block" onClick={() => setMobileMenuOpen(false)}>
                     <button className="w-full px-6 py-3 text-sm font-semibold text-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-600 rounded-full transition-all duration-300 hover:border-slate-400 dark:hover:border-slate-500">
