@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { Package, Users, ClipboardList, TrendingUp } from 'lucide-react'
 
+export const runtime = "nodejs"
+
 export default async function AdminDashboard() {
   const [userCount, voucherCount, taskCount, totalXP] = await Promise.all([
     prisma.profile.count(),

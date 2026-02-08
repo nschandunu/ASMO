@@ -5,6 +5,7 @@ import { LayoutDashboard, Package, Users, ClipboardList, FileText } from 'lucide
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
+export const runtime = "nodejs"
 
 export default async function AdminLayout({
   children,

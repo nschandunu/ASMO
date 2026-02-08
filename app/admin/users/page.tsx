@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { UserTable } from './user-table'
 
+export const runtime = "nodejs"
+
 export default async function UserTracker() {
   const users = await prisma.profile.findMany({
     orderBy: { createdAt: 'desc' },
